@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  role          Role      @default(USER)
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  isActive      Boolean   @default(true)
+  
+  // Authentication
+  accounts      Account[]
+  sessions      Session[]
+  
+  // User activities
+  dashboards    Dashboard[]
+  reports       Report[]
+  activities    UserActivity[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  plan        Plan     @default(FREE)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  dashboards  Dashboard[]
+  dataSources DataSource[]
+  
+  @@map("organizations")
+}
+
+model Dashboard {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  config         Json         @default("{}")
+  isPublic       Boolean      @default(false)
+  organizationId String
+  createdById    String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User         @relation(fields: [createdById], references: [id])
+  widgets        Widget[]
+  
+  @@map("dashboards")
+}
+
+model Widget {
+  id          String      @id @default(cuid())
+  title       String
+  type        WidgetType
+  config      Json        @default("{}")
+  position    Json        @default("{}")
+  dashboardId String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  dashboard   Dashboard   @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  
+  @@map("widgets")
+}
+
+model DataSource {
+  id             String       @id @default(cuid())
+  name           String
+  type           DataSourceType
+  config         Json         @default("{}")
+  isActive       Boolean      @default(true)
+  organizationId String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reports        Report[]
+  
+  @@map("data_sources")
+}
+
+model Report {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  query        String
+  config       Json       @default("{}")
+  schedule     String?    // Cron expression for scheduled reports
+  isActive     Boolean    @default(true)
+  dataSourceId String
+  createdById  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Relations
+  dataSource   DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  
+  @@map("reports")
+}
+
+model UserActivity {
+  id        String           @id @default(cuid())
+  userId    String
+  action    UserActivityType
+  resource  String           // Resource type (dashboard, report, etc.)
+  resourceId String?         // ID of the resource
+  metadata  Json?            @default("{}")
+  createdAt DateTime         @default(now())
+  
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_activities")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum WidgetType {
+  CHART_LINE
+  CHART_BAR
+  CHART_PIE
+  CHART_DOUGHNUT
+  CHART_AREA
+  KPI
+  TABLE
+  TEXT
+  METRIC
+}
+
+enum DataSourceType {
+  POSTGRESQL
+  MYSQL
+  MONGODB
+  REST_API
+  GRAPHQL
+  CSV
+  GOOGLE_SHEETS
+}
+
+enum UserActivityType {
+  LOGIN
+  LOGOUT
+  DASHBOARD_CREATE
+  DASHBOARD_UPDATE
+  DASHBOARD_DELETE
+  DASHBOARD_VIEW
+  REPORT_CREATE
+  REPORT_UPDATE
+  REPORT_DELETE
+  REPORT_RUN
+  DATA_SOURCE_CREATE
+  DATA_SOURCE_UPDATE
+  DATA_SOURCE_DELETE
+}

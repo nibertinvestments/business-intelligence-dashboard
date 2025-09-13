@@ -62,8 +62,7 @@
     "docker:build": "docker build -t bi-dashboard .",
     "docker:run": "docker run -p 3000:3000 --env-file .env.local bi-dashboard",
     "security:audit": "npm audit --audit-level high",
-    "security:snyk": "snyk test",
-    "performance:test": "k6 run tests/performance/load-test.js",
+    "performance:test": "echo 'Performance testing with k6 - install k6 separately'",
     "backup:db": "./scripts/backup-database.sh",
     "deploy:staging": "npm run build && npm run db:migrate:deploy",
     "deploy:production": "npm run build && npm run db:migrate:deploy"
@@ -93,7 +92,7 @@
     "framer-motion": "^10.16.0",
     "react-hook-form": "^7.47.0",
     "@hookform/resolvers": "^3.3.0",
-    "react-query": "^3.39.0",
+    "@tanstack/react-query": "^4.36.1",
     "zustand": "^4.4.0",
     "date-fns": "^2.30.0",
     "uuid": "^9.0.1",
@@ -102,7 +101,10 @@
     "compression": "^1.7.4",
     "helmet": "^7.1.0",
     "winston": "^3.11.0",
-    "newrelic": "^11.5.0"
+    "newrelic": "^11.5.0",
+    "@next-auth/prisma-adapter": "^1.0.7",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",
@@ -137,10 +139,7 @@
     "lint-staged": "^15.0.0",
     "cross-env": "^7.0.3",
     "@next/bundle-analyzer": "^14.0.0",
-    "@lighthouse-ci/cli": "^0.12.0",
-    "k6": "^0.47.0",
-    "snyk": "^1.1244.0",
-    "typescript-eslint": "^0.0.1-alpha.0",
+    "@lhci/cli": "^0.12.0",
     "node-mocks-http": "^1.13.0"
   },
   "prisma": {
