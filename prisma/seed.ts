@@ -109,7 +109,7 @@ async function main() {
   const widgets = [
     {
       id: 'widget-revenue',
-      type: 'METRIC',
+      type: 'METRIC' as const,
       title: 'Total Revenue',
       position: { x: 0, y: 0, w: 3, h: 2 },
       config: {
@@ -121,7 +121,7 @@ async function main() {
     },
     {
       id: 'widget-orders',
-      type: 'METRIC',
+      type: 'METRIC' as const,
       title: 'Total Orders',
       position: { x: 3, y: 0, w: 3, h: 2 },
       config: {
@@ -132,7 +132,7 @@ async function main() {
     },
     {
       id: 'widget-growth',
-      type: 'CHART',
+      type: 'CHART' as const,
       title: 'Revenue Growth',
       position: { x: 0, y: 2, w: 6, h: 4 },
       config: {
@@ -144,7 +144,7 @@ async function main() {
     },
     {
       id: 'widget-top-products',
-      type: 'TABLE',
+      type: 'TABLE' as const,
       title: 'Top Products',
       position: { x: 6, y: 0, w: 6, h: 6 },
       config: {

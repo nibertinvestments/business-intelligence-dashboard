@@ -37,7 +37,7 @@ export function formatDate(
     return formatRelativeTime(dateObj)
   }
 
-  const formatOptions: Intl.DateTimeFormatOptions = {
+  const formatOptions: Record<string, Intl.DateTimeFormatOptions> = {
     short: { dateStyle: 'short' },
     medium: { dateStyle: 'medium' },
     long: { dateStyle: 'long', timeStyle: 'short' },
