@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Business Intelligence Dashboard provides a comprehensive RESTful API for managing dashboards, analytics data, and user interactions. All endpoints require authentication via JWT tokens.
+The Business Intelligence Dashboard provides a comprehensive RESTful API for managing dashboards, analytics data, and user interactions. The API is currently in development mode using mock data.
 
 ## Base URL
 
@@ -13,39 +13,7 @@ Production: https://your-domain.com/api
 
 ## Authentication
 
-All API requests require a valid JWT token in the Authorization header:
-
-```http
-Authorization: Bearer your-jwt-token-here
-```
-
-### Getting a Token
-
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "your-password"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "user-id",
-      "email": "user@example.com",
-      "name": "User Name"
-    }
-  }
-}
-```
+**Note:** Authentication is currently being implemented. All endpoints are temporarily accessible without authentication for development purposes.
 
 ## Error Handling
 
@@ -75,7 +43,143 @@ All API endpoints return consistent error responses:
 
 ## Endpoints
 
-### Authentication
+## Available Endpoints
+
+### Health Check
+
+#### System Health
+```http
+GET /api/health
+```
+
+Returns the current system health status and information.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-09-13T22:20:35.749Z",
+  "version": "1.0.0",
+  "environment": "development",
+  "uptime": 16.848162195,
+  "database": {
+    "status": "healthy",
+    "timestamp": "2025-09-13T22:20:35.749Z"
+  },
+  "services": {
+    "api": "healthy",
+    "redis": "healthy"
+  }
+}
+```
+
+### Dashboards
+
+#### List Dashboards
+```http
+GET /api/dashboards
+```
+
+**Query Parameters:**
+- `page` (integer, optional): Page number (default: 1)
+- `limit` (integer, optional): Items per page (default: 10, max: 100)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "title": "Sales Dashboard",
+      "description": "Overview of sales metrics",
+      "config": {},
+      "isPublic": false,
+      "organizationId": "org-1",
+      "createdById": "user-1",
+      "createdAt": "2025-09-13T22:20:41.615Z",
+      "updatedAt": "2025-09-13T22:20:41.615Z",
+      "createdBy": {
+        "id": "user-1",
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "organization": {
+        "id": "org-1",
+        "name": "Example Company"
+      },
+      "widgets": [
+        {
+          "id": "widget-1",
+          "title": "Revenue Chart",
+          "type": "CHART_LINE"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  }
+}
+```
+
+#### Create Dashboard
+```http
+POST /api/dashboards
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "string (required, max 255 chars)",
+  "description": "string (optional)",
+  "config": "object (optional)",
+  "isPublic": "boolean (optional, default: false)"
+}
+```
+
+**Example Request:**
+```json
+{
+  "title": "Test Dashboard",
+  "description": "A test dashboard",
+  "isPublic": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "1757802278308",
+    "title": "Test Dashboard",
+    "description": "A test dashboard",
+    "isPublic": false,
+    "createdById": "user-1",
+    "organizationId": "org-1",
+    "createdAt": "2025-09-13T22:24:38.308Z",
+    "updatedAt": "2025-09-13T22:24:38.308Z",
+    "createdBy": {
+      "id": "user-1",
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    "organization": {
+      "id": "org-1",
+      "name": "Example Company"
+    }
+  }
+}
+```
+
+### Authentication (Coming Soon)
+
+Authentication endpoints will be available in the next release:
 
 #### Login
 ```http
