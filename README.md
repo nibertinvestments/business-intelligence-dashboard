@@ -132,13 +132,19 @@ cp .env.example .env.local
 # Edit .env.local with your configuration
 
 # Set up the database
-npm run db:setup
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 
 # Start the development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+**Demo Credentials:**
+- Admin: `admin@example.com` / `admin123`
+- Demo User: `demo@example.com` / `demo123`
 
 ## 📦 Installation
 
