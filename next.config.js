@@ -2,10 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'standalone', // Enable standalone output for Docker
+  // output: 'standalone', // Commented out for Vercel deployment - use for Docker only
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: ['localhost:3000', 'vercel.app', '*.vercel.app'],
     },
   },
   images: {
