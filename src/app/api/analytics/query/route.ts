@@ -4,6 +4,88 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
+// GET endpoint for analytics overview
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Get analytics data from database
+    const [dashboards, users, dataSources] = await Promise.all([
+      prisma.dashboard.count({ where: { tenantId: session.user.tenantId } }),
+      prisma.user.count({ where: { tenantId: session.user.tenantId } }),
+      prisma.dataSource.count({ where: { tenantId: session.user.tenantId } }),
+    ])
+
+    // Get top dashboards
+    const topDashboards = await prisma.dashboard.findMany({
+      where: { tenantId: session.user.tenantId },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 5,
+    })
+
+    // Get recent activity (simplified)
+    const recentActivity = await prisma.dashboard.findMany({
+      where: { tenantId: session.user.tenantId },
+      include: {
+        user: { select: { name: true, email: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 10,
+    })
+
+    // Mock some analytics data since we don't have tracking tables yet
+    const analyticsData = {
+      overview: {
+        totalDashboards: dashboards,
+        totalUsers: users,
+        totalViews: Math.floor(Math.random() * 5000) + 1000, // Mock data
+        averageLoadTime: Math.random() * 2 + 0.5, // Mock data
+      },
+      trends: {
+        dashboardsGrowth: Math.random() * 20 - 5, // Mock data
+        usersGrowth: Math.random() * 15 + 2, // Mock data
+        viewsGrowth: Math.random() * 30 + 5, // Mock data
+        performanceChange: Math.random() * 10 - 5, // Mock data
+      },
+      topDashboards: topDashboards.map((dashboard, index) => ({
+        id: dashboard.id,
+        title: dashboard.title,
+        views: Math.floor(Math.random() * 1000) + 100, // Mock data
+        lastViewed: dashboard.updatedAt.toISOString(),
+      })),
+      recentActivity: recentActivity.map((activity, index) => ({
+        id: `activity-${index}`,
+        type: 'dashboard_update',
+        description: `Dashboard "${activity.title}" was updated`,
+        timestamp: activity.updatedAt.toISOString(),
+        user: activity.user.name || activity.user.email,
+      })),
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: analyticsData,
+    })
+  } catch (error) {
+    console.error('Error fetching analytics:', error)
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 const queryDataSchema = z.object({
   dataSourceId: z.string().min(1, 'Data source ID is required'),
   query: z.string().min(1, 'Query is required'),
